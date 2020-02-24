@@ -15,16 +15,6 @@ class XNOR_NN:
         self.NUM_LAYERS     = num_layers;           ## 3-layers NN: input layer, inter-layer, output-layer.
         self.y              = np.array( y   ).T;    ## y - data output.
 
-
-        #self.y              =   [];
-        #for n in y:
-        #    if n:       self.y.append(  [0,1]);
-        #    else:       self.y.append(  [1,0]);
-        
-        #self.y              =   np.array(   self.y).T;
-
-
-
         if X:       
             if      type(X) == list:                self.X  = np.array(X);            
             elif    type(X) == np.ndarray:          self.X  = X;
@@ -114,14 +104,6 @@ class XNOR_NN:
 
         #print(fmin_res);
         return;
-    
-
-    #def decorated_cost(theta):
-        #return cost_function_reg(theta, it, y, l)
-
-        #print fmin_bfgs(decorated_cost, initial_theta, maxfun=400)
-
-
 
     def Theta_gradient( self, flattened_thetas):
 
