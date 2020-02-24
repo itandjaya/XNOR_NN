@@ -1,7 +1,7 @@
 ### 2 - XNOR Neural Network.
 
 import numpy as np;                 #   Numpy for numerical matrix computations.
-from scipy.optimize import fmin_bfgs, minimize;
+from scipy.optimize import fmin_bfgs, minimize;     #   To use built-in minimize function.
 
 
 class XNOR_NN:
@@ -10,10 +10,23 @@ class XNOR_NN:
         
         self.var_lambda     = 0;
         self.var_alpha      = 1;
-        self.learning_iter  = 20000;
+        self.learning_iter  = 10000;                ##  With current weights initialization,
+                                                    ##  the weights should converge at iter ~= 1.5k.
+        self.J_Cost_values  = [];
 
         self.NUM_LAYERS     = num_layers;           ## 3-layers NN: input layer, inter-layer, output-layer.
         self.y              = np.array( y   ).T;    ## y - data output.
+        
+
+
+        #self.y              =   [];
+        #for n in y:
+        #    if n:       self.y.append(  [0,1]);
+        #    else:       self.y.append(  [1,0]);
+        
+        #self.y              =   np.array(   self.y).T;
+
+
 
         if X:       
             if      type(X) == list:                self.X  = np.array(X);            
@@ -32,8 +45,8 @@ class XNOR_NN:
 
         self.init_thetas();                     #   Initialize random thetas (weights).
 
-        self.z      =   [];
-        self.a      =   [];
+        self.z      =   [];                     #   save previous values of theta' * a.
+        self.a      =   [];                     #   save each activation data of each layer.
 
         return;
     
@@ -80,10 +93,7 @@ class XNOR_NN:
         return;
         
 
-    def train_NN_with_fmin( self):
-
-        #def decorated_cost(flatenned_thetas):
-        #    return self.Cost_function_reg(  flatenned_thetas);
+    def train_NN_with_fmin( self):        
         
         init_flattened_thetas   =   self.flatten_Thetas();
 
@@ -95,6 +105,9 @@ class XNOR_NN:
                                     gtol    = (1e-08));
                                     #disp=True, maxiter=400, full_output = True, retall=True);
         
+        #def decorated_cost(flatenned_thetas):
+        #    return self.Cost_function_reg(  flatenned_thetas);
+
         #f_min_res  =   minimize(    fun     = decorated_cost, \
         #                            x0      = init_flattened_thetas, \
         #                            args    = (self.X, self.y), \
@@ -104,6 +117,8 @@ class XNOR_NN:
 
         #print(fmin_res);
         return;
+
+
 
     def Theta_gradient( self, flattened_thetas):
 
@@ -201,6 +216,7 @@ class XNOR_NN:
 
         #######################################
         ## Feed-forward. ######################
+        self.J_cost_values = [];
 
         for ith in range(self.learning_iter):
             #print(self.Thetas);
@@ -216,8 +232,10 @@ class XNOR_NN:
             a[-1]               =   a[-1][:,1:];
             self.a, self.zip    =   a, z;
 
-            #J = self.J_cost(    a[-1])  ;       ## Compute cost for each iteration; cost should decrease
+            J = self.J_cost(    a[-1])  ;       ## Compute cost for each iteration; cost should decrease
                                                 ##  per iteration.
+
+            self.J_cost_values.append(  J);
             #print("J_cost = ", J);
             
 
@@ -269,7 +287,6 @@ class XNOR_NN:
 
         J = J + (   (0.5 * self.var_lambda / m) * J_reg_term    );
 
-
         return J;
 
 
@@ -289,8 +306,7 @@ class XNOR_NN:
         sg = self.sigmoid(Z);
         return sg * (1. - sg);
 
-    def H_funct(self, X):
-        
+    def H_funct(self, X):        
         h           =   np.concatenate( (np.ones( (1,1)), np.array(X)), 1);
         for theta in self.Thetas:
             h       =   self.sigmoid(    h.dot(theta.T));
